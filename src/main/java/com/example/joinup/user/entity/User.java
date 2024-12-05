@@ -20,7 +20,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 데이터베이스에서 자동으로 ID 값 생성
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     // 'id'는 사용자의 로그인 ID를 나타냅니다.
     // ID는 필수값이며, 길이는 3자 이상, 10자 이하로 설정됩니다.

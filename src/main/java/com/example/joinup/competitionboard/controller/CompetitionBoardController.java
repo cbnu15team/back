@@ -41,23 +41,5 @@ public class CompetitionBoardController {
         return ResponseEntity.ok(pages);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createBoard(@RequestBody CompetitionPage page) {
-        try {
-            if (page.getUser() == null || page.getUser().getUserId() == null) {
-                throw new RuntimeException("유저 userId는 필수입니다.");
-            }
 
-            User user = userService.findByUserId(page.getUser().getUserId())
-                    .orElseThrow(() -> new RuntimeException("해당 userId의 유저를 찾을 수 없습니다."));
-
-            page.setUser(user);
-
-            CompetitionPage createdPage = competitionPageService.createPage(page);
-
-            return ResponseEntity.ok(new CompetitionBoardResponse(createdPage));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("게시글 생성 실패: " + e.getMessage());
-        }
-    }
 }

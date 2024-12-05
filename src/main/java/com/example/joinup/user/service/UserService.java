@@ -28,6 +28,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public User login(String id, String password) throws Exception {
         Optional<User> userOptional = userRepository.findById(id);
 

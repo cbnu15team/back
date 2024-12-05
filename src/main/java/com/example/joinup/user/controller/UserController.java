@@ -1,13 +1,15 @@
 package com.example.joinup.user.controller;
 
+import com.example.joinup.user.UserDTO.UserDTO;
 import com.example.joinup.user.entity.User;
 import com.example.joinup.user.repository.UserRepository;
 import com.example.joinup.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -43,12 +45,12 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+    public ResponseEntity<String> loginUser(@RequestBody UserDTO loginRequest) {
         System.out.println("로그인 요청: ID=" + loginRequest.getId() + ", Password=" + loginRequest.getPassword());
         try {
             // 사용자 로그인 (서비스 레이어로 처리 위임)
             User user = userService.login(loginRequest.getId(), loginRequest.getPassword());
-            return ResponseEntity.ok(user); // 성공 시 사용자 정보 반환
+            return ResponseEntity.ok("aaa"); // 성공 시 사용자 정보 반환
 
         } catch (Exception e) {
             return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
