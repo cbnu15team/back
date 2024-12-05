@@ -28,12 +28,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User login(String id, String password) {
-        return userRepository.findByIdAndPassword(id, password)
-                .orElseThrow(() -> new RuntimeException("아이디 또는 비밀번호가 잘못되었습니다."));
+    public User login(String id, String password) throws Exception {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (userOptional.isEmpty()) {
+            throw new Exception("해당 ID가 존재하지 않습니다.");
+        }
+
+        User user = userOptional.get();
+        if (!user.getPassword().equals(password)) {
+            throw new Exception("비밀번호가 일치하지 않습니다.");
+        }
+
+        return user; // 로그인 성공 시 유저 객체 반환
     }
 
-    public Optional<User> findByUserId(Integer userId) {
-        return userRepository.findById(userId); // userId 기반 조회
-    }
-}
