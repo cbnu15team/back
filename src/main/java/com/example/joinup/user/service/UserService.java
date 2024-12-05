@@ -42,4 +42,4 @@ public class UserService {
 
         return user; // 로그인 성공 시 유저 객체 반환
     }
-
+}

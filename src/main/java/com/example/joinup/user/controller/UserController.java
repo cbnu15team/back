@@ -1,6 +1,7 @@
 package com.example.joinup.user.controller;
 
 import com.example.joinup.user.entity.User;
+import com.example.joinup.user.repository.UserRepository;
 import com.example.joinup.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,8 @@ public class UserController {
         this.userService = userService;
     }
 
+
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
@@ -25,16 +28,14 @@ public class UserController {
                 return ResponseEntity.badRequest().body("생년월일은 필수 입력 항목입니다.");
             }
 
-            // 중복된 아이디 검사
-            if (userRepository.existsById(user.getId())) {
-                return ResponseEntity.status(400).body("이미 존재하는 아이디입니다.");
-            }
-
-            // 사용자 저장
-            User savedUser = userRepository.save(user);
+            // 사용자 등록 (서비스 레이어로 처리 위임)
+            User savedUser = userService.registerUser(user);
             return ResponseEntity.ok(savedUser);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body("회원가입 실패: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("회원가입 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body("서버 오류: " + e.getMessage());
         }
     }
 
@@ -42,19 +43,15 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String id = request.get("id");
-        String password = request.get("password");
-
+    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+        System.out.println("로그인 요청: ID=" + loginRequest.getId() + ", Password=" + loginRequest.getPassword());
         try {
-            // 사용자 검증 로직만 수행
-            User user = userService.login(id, password);
-            System.out.println("로그인 성공: " + user.getId());
-            return ResponseEntity.ok("로그인 성공!");
+            // 사용자 로그인 (서비스 레이어로 처리 위임)
+            User user = userService.login(loginRequest.getId(), loginRequest.getPassword());
+            return ResponseEntity.ok(user); // 성공 시 사용자 정보 반환
+
         } catch (Exception e) {
-            System.err.println("로그인 실패: " + e.getMessage());
-        }
             return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
         }
     }
-
+}

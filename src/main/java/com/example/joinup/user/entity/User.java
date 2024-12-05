@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // User 엔티티는 애플리케이션 사용자 정보를 관리하는 클래스입니다.
@@ -11,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "users")
 public class User {
 
@@ -51,32 +53,5 @@ public class User {
 
     // Getter 및 Setter 메서드
 
-    public Integer getUserId() { // 고유 ID 조회
-        return userId;
-    }
 
-    public void setUserId(Integer userId) { // 고유 ID 설정
-        this.userId = userId;
-    }
-
-    public String getLoginId() { // 로그인 ID 조회
-        return id;
-    }
-
-    public void setId(String id) { // 로그인 ID 설정
-        this.id = id;
-    }
-
-    public String getPassword() { // 비밀번호 조회
-        return password;
-    }
-
-    public void setPassword(String password) { // 비밀번호 설정
-        this.password = password;
-    }
-
-    // getId() 메서드 추가: 로그인 ID 반환
-    public String getId() {
-        return this.id; // ID로 사용할 필드 반환
-    }
 }
