@@ -1,5 +1,6 @@
 package com.example.joinup.user.service;
 
+import com.example.joinup.security.JwtUtil;
 import com.example.joinup.user.entity.User;
 import com.example.joinup.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil; // JwtUtil 주입
     }
 
     @Transactional
@@ -43,4 +46,16 @@ public class UserService {
 
         return user; // 로그인 성공 시 유저 객체 반환
     }
+
+    // JWT 토큰 생성
+    public String generateToken(User user) {
+        return jwtUtil.generateToken(user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public User findById(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userId));
+    }
+
 }

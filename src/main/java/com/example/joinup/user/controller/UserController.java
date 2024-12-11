@@ -45,15 +45,24 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserDTO loginRequest) {
+// 반환 타입을 Map<String, String>으로 수정
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody UserDTO loginRequest) {
         System.out.println("로그인 요청: ID=" + loginRequest.getId() + ", Password=" + loginRequest.getPassword());
         try {
             // 사용자 로그인 (서비스 레이어로 처리 위임)
             User user = userService.login(loginRequest.getId(), loginRequest.getPassword());
-            return ResponseEntity.ok("aaa"); // 성공 시 사용자 정보 반환
+
+            // JWT 토큰 생성
+            String token = userService.generateToken(user);
+
+            // 성공 시 JWT 토큰 반환
+            // ResponseEntity<String> → ResponseEntity<Map<String, String>>로 수정
+            return ResponseEntity.ok(Map.of("token", token)); // Map 형식으로 반환
 
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
+            // 에러 메시지도 Map 형식으로 반환하도록 수정
+            return ResponseEntity.status(401).body(Map.of("error", "로그인 실패: " + e.getMessage()));
         }
     }
+
 }

@@ -23,7 +23,14 @@ public class CompetitionPageResponse {
         this.views = page.getViews();
         this.content = page.getContent();
     }
-
+    public CompetitionPage toEntity() {
+        CompetitionPage competitionPage = new CompetitionPage();
+        competitionPage.setBoardType(this.boardType);
+        competitionPage.setTitle(this.title);
+        competitionPage.setContent(this.content);
+        // ID와 User는 엔티티에서 직접 관리하는 것이 일반적
+        return competitionPage;
+    }
     // Getters
     public Long getPageId() {
         return pageId;
