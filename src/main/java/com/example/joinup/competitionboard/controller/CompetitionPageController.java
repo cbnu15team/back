@@ -1,3 +1,4 @@
+// CompetitionPageController.java
 package com.example.joinup.competitionboard.controller;
 
 import com.example.joinup.competitionboard.dto.CompetitionPageResponse;
@@ -23,7 +24,7 @@ public class CompetitionPageController {
         this.userService = userService;
     }
 
-    // 새로운 CaompetitionPage 작성
+    // 새로운 CompetitionPage 작성
     @PostMapping
     public ResponseEntity<?> createCompetitionPage(
             @RequestBody CompetitionPage competitionPage,
@@ -41,9 +42,9 @@ public class CompetitionPageController {
             User user = userService.findById(userId);
             competitionPage.setUser(user); // CompetitionPage에 사용자 설정
 
-            // CompetitionPage 생성
-            CompetitionPage savedPage = competitionPageService.createPage(competitionPage);
-            return ResponseEntity.ok(savedPage);
+            // CompetitionPage 생성 및 Response 반환
+            CompetitionPageResponse response = competitionPageService.createPage(competitionPage);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("게시글 작성 중 오류 발생: " + e.getMessage());
