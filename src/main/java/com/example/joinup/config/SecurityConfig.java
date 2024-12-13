@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login").permitAll() //인증 불필요
                         .requestMatchers("/api/competition-pages/**").permitAll()//인증 불필요
+                        .requestMatchers("/api/challenges/**").authenticated() // 챌린지 API는 인증 필요
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
