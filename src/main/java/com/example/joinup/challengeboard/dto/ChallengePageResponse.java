@@ -18,7 +18,7 @@ public class ChallengePageResponse {
         this.pageId = page.getPageId();
         this.title = page.getTitle();
         this.boardType = page.getBoardType();
-        this.userId = page.getUser().getId(); // 작성자의 로그인 ID
+        this.userId = page.getUser().getId();
         this.createdAt = page.getCreatedAt();
         this.views = page.getViews();
         this.content = page.getContent();

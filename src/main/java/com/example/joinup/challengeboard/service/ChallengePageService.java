@@ -70,4 +70,25 @@ public class ChallengePageService {
         entityManager.flush();
         entityManager.clear();
     }
+
+    // 페이지 업데이트
+    @Transactional
+    public ChallengePageResponse updatePage(Long id, ChallengePage updatedPage, String userId) {
+        ChallengePage existingPage = challengePageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("수정하려는 페이지가 존재하지 않습니다. ID: " + id));
+
+        // 작성자 확인
+        if (!existingPage.getUser().getId().equals(userId)) {
+            throw new RuntimeException("작성자만 게시글을 수정할 수 있습니다.");
+        }
+
+        // 필드 업데이트
+        existingPage.setTitle(updatedPage.getTitle());
+        existingPage.setContent(updatedPage.getContent());
+        existingPage.setBoardType(updatedPage.getBoardType());
+
+        // 저장 후 응답 반환
+        ChallengePage savedPage = challengePageRepository.save(existingPage);
+        return new ChallengePageResponse(savedPage);
+    }
 }

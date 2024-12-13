@@ -18,7 +18,6 @@ public class ChallengeBoardResponse {
         this.pageId = page.getPageId();
         this.title = page.getTitle();
         this.boardType = page.getBoardType();
-        // userId가 null일 경우 "Unknown User"로 설정
         this.userId = (page.getUser() != null && page.getUser().getId() != null)
                 ? page.getUser().getId()
                 : "Unknown User";
