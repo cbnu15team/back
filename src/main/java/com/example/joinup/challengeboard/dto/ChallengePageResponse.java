@@ -24,6 +24,15 @@ public class ChallengePageResponse {
         this.content = page.getContent();
     }
 
+    public ChallengePage toEntity() {
+        ChallengePage challengePage = new ChallengePage();
+        challengePage.setBoardType(this.boardType);
+        challengePage.setTitle(this.title);
+        challengePage.setContent(this.content);
+        // ID와 User는 엔티티에서 직접 관리하는 것이 일반적
+        return challengePage;
+    }
+
     // Getters
     public Long getPageId() {
         return pageId;

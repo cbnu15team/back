@@ -19,12 +19,9 @@ public class ChallengeBoardService {
 
     // 특정 게시판의 페이지 목록 조회
     public List<ChallengeBoardResponse> getPagesByBoardType(String boardType) {
-        List<ChallengePage> pages = challengePageRepository.findAll()
+        return challengePageRepository.findAll()
                 .stream()
-                //.filter(page -> page.getBoardType().equalsIgnoreCase(boardType))
-                .collect(Collectors.toList());
-
-        return pages.stream()
+                .filter(page -> page.getBoardType().equalsIgnoreCase(boardType)) // 필터링 추가
                 .map(ChallengeBoardResponse::new)
                 .collect(Collectors.toList());
     }
