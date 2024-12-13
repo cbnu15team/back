@@ -77,27 +77,21 @@ public class CompetitionPageController {
             @PathVariable Long id,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            // JWT에서 사용자 ID 추출
+            // JWT 토큰 검증 및 사용자 ID 추출
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(401).body("인증 토큰이 필요합니다.");
             }
 
             String token = authHeader.substring(7); // "Bearer " 제거
-            String userId = jwtUtil.extractUsername(token); // 토큰에서 사용자 ID 추출
+            String userId = jwtUtil.extractUsername(token); // 사용자 ID 추출
 
-            // 게시글 조회
-            CompetitionPage competitionPage = competitionPageService.getPageById(id).toEntity();
-
-            // 작성자와 토큰 소유자가 같은지 확인
-            if (!competitionPage.getUser().getId().equals(userId)) {
-                return ResponseEntity.status(403).body("작성자만 게시글을 삭제할 수 있습니다.");
-            }
-
-            // 게시글 삭제
-            competitionPageService.deletePage(id);
+            // 삭제 권한 확인 및 삭제 수행
+            competitionPageService.deletePageIfOwner(id, userId);
             return ResponseEntity.ok("게시글이 삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(404).body("게시글 삭제 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body("게시글 삭제 중 오류 발생: " + e.getMessage());
         }
     }
 }

@@ -6,6 +6,9 @@ import com.example.joinup.competitionboard.repository.CompetitionPageRepository;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,9 +17,11 @@ import java.util.stream.Collectors;
 public class CompetitionPageService {
 
     private final CompetitionPageRepository competitionPageRepository;
+    private final EntityManager entityManager; // EntityManager 추가
 
-    public CompetitionPageService(CompetitionPageRepository competitionPageRepository) {
+    public CompetitionPageService(CompetitionPageRepository competitionPageRepository, EntityManager entityManager) {
         this.competitionPageRepository = competitionPageRepository;
+        this.entityManager = entityManager; // 주입된 EntityManager 초기화
     }
 
     /**
@@ -61,10 +66,21 @@ public class CompetitionPageService {
      * CompetitionPage 삭제
      */
     @Transactional
-    public void deletePage(Long id) {
-        if (!competitionPageRepository.existsById(id)) {
-            throw new IllegalArgumentException("삭제하려는 페이지가 존재하지 않습니다. ID: " + id);
+    public void deletePageIfOwner(Long id, String userId) {
+        CompetitionPage page = competitionPageRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("삭제하려는 페이지가 존재하지 않습니다. ID: " + id));
+
+        // 작성자가 요청한 사용자와 동일한지 확인
+        if (!page.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("작성자만 게시글을 삭제할 수 있습니다.");
         }
-        competitionPageRepository.deleteById(id);
+
+        // 삭제 처리
+        competitionPageRepository.delete(page);
+
+        // DB로 강제 반영 및 캐시 초기화
+        entityManager.flush(); // 변경 사항 강제 반영
+        entityManager.clear(); // 캐시 초기화
     }
+
 }
