@@ -94,4 +94,28 @@ public class CompetitionPageController {
             return ResponseEntity.status(500).body("게시글 삭제 중 오류 발생: " + e.getMessage());
         }
     }
+    @PutMapping("/{id}") //수정
+    public ResponseEntity<?> updateCompetitionPage(
+            @PathVariable Long id,
+            @RequestBody CompetitionPage updatedPage,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body("인증 토큰이 필요합니다.");
+            }
+
+            String token = authHeader.substring(7); // "Bearer " 제거
+            String userId = jwtUtil.extractUsername(token); // 사용자 ID 추출
+
+            // 수정 작업 수행
+            CompetitionPageResponse response = competitionPageService.updatePage(id, updatedPage, userId);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("게시글 수정 중 오류 발생: " + e.getMessage());
+        }
+    }
+
 }

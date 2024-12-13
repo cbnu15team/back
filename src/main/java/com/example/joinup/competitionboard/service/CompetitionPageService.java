@@ -82,5 +82,24 @@ public class CompetitionPageService {
         entityManager.flush(); // 변경 사항 강제 반영
         entityManager.clear(); // 캐시 초기화
     }
+    @Transactional
+    public CompetitionPageResponse updatePage(Long id, CompetitionPage updatedPage, String userId) {
+        CompetitionPage existingPage = competitionPageRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("수정하려는 페이지가 존재하지 않습니다. ID: " + id));
+
+        // 작성자 확인
+        if (!existingPage.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("작성자만 게시글을 수정할 수 있습니다.");
+        }
+
+        // 필드 업데이트
+        existingPage.setTitle(updatedPage.getTitle());
+        existingPage.setContent(updatedPage.getContent());
+        existingPage.setBoardType(updatedPage.getBoardType());
+
+        // 저장 후 응답 반환
+        CompetitionPage savedPage = competitionPageRepository.save(existingPage);
+        return new CompetitionPageResponse(savedPage);
+    }
 
 }
