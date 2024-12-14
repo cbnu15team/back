@@ -35,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/competition-boards/**").permitAll() // 인증 없이 접근 가능
                         .requestMatchers("/api/challenge-boards/**").permitAll() // 인증 없이 접근 가능
                         .requestMatchers("/api/challenges/**").authenticated() // 챌린지 API는 인증 필요
+                        .requestMatchers("/api/users/register").permitAll() // 회원가입 경로 인증 없이 허용
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
@@ -61,7 +63,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -76,6 +77,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
