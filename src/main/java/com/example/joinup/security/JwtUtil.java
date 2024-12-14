@@ -18,7 +18,7 @@ public class JwtUtil {
 
     // 더 안전한 환경 변수 또는 설정 파일에서 SECRET_KEY 로드 추천
     private static final String SECRET_KEY = "your-secure-secret-key-for-jwt-more-secure-and-longer";
-    private static final long EXPIRATION_TIME = 3600000; // 1시간
+    private static final long EXPIRATION_TIME = 86400000; // 만료시간 하루
 
     // JWT 키 반환
     private final Key key;
