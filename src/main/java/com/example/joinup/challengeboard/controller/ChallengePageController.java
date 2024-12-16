@@ -35,7 +35,7 @@ public class ChallengePageController {
             }
 
             String token = authHeader.substring(7);
-            String userId = jwtUtil.extractUsername(token);
+            String userId = jwtUtil.validateAndExtractUsername(token);
 
             User user = userService.findById(userId);
             challengePage.setUser(user);
@@ -74,7 +74,7 @@ public class ChallengePageController {
             }
 
             String token = authHeader.substring(7);
-            String userId = jwtUtil.extractUsername(token);
+            String userId = jwtUtil.validateAndExtractUsername(token);
 
             challengePageService.deletePageIfOwner(id, userId);
             return ResponseEntity.ok("게시글이 삭제되었습니다.");
@@ -96,7 +96,7 @@ public class ChallengePageController {
             }
 
             String token = authHeader.substring(7);
-            String userId = jwtUtil.extractUsername(token);
+            String userId = jwtUtil.validateAndExtractUsername(token);
 
             ChallengePageResponse response = challengePageService.updatePage(id, updatedPage, userId);
             return ResponseEntity.ok(response);

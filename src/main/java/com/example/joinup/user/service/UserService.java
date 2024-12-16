@@ -16,38 +16,28 @@ public class UserService {
 
     public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil; // JwtUtil 주입
+        this.jwtUtil = jwtUtil;
     }
 
     @Transactional
     public User registerUser(User user) {
-        // 로그인 ID 중복 확인
-        boolean exists = userRepository.findById(user.getId()).isPresent(); // 적절한 ID 체크 로직 사용
+        boolean exists = userRepository.findById(user.getId()).isPresent();
         if (exists) {
             throw new RuntimeException("이미 존재하는 ID입니다: " + user.getId());
         }
-
-        // 사용자 저장
         return userRepository.save(user);
     }
 
     @Transactional
     public User login(String id, String password) throws Exception {
         Optional<User> userOptional = userRepository.findById(id);
-
-        if (userOptional.isEmpty()) {
-            throw new Exception("해당 ID가 존재하지 않습니다.");
-        }
-
-        User user = userOptional.get();
+        User user = userOptional.orElseThrow(() -> new Exception("해당 ID가 존재하지 않습니다."));
         if (!user.getPassword().equals(password)) {
             throw new Exception("비밀번호가 일치하지 않습니다.");
         }
-
-        return user; // 로그인 성공 시 유저 객체 반환
+        return user;
     }
 
-    // JWT 토큰 생성
     public String generateToken(User user) {
         return jwtUtil.generateToken(user.getId());
     }

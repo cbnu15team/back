@@ -20,6 +20,9 @@ public class ChallengePost {
     private User user;
 
     @Column(nullable = false)
+    private String title; // 제목 필드 추가
+
+    @Column(nullable = false)
     private String photoUrl;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -41,7 +44,6 @@ public class ChallengePost {
         }
     }
 
-    // 조회 수 증가 메서드 추가
     public void incrementViews() {
         this.views++;
     }

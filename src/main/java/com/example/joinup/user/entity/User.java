@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Getter
 @Setter
@@ -42,5 +44,11 @@ public class User {
 
     // CompetitionPage와의 연관관계 설정
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CompetitionPage> competitionPages = new ArrayList<>();
+
+    public String getUsername() {
+        return this.id; // ID 필드를 사용자 이름으로 간주
+    }
+
 }

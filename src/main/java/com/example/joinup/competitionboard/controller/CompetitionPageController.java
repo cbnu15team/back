@@ -36,7 +36,7 @@ public class CompetitionPageController {
             }
 
             String token = authHeader.substring(7); // "Bearer " 제거
-            String userId = jwtUtil.extractUsername(token);
+            String userId = jwtUtil.validateAndExtractUsername(token);
 
             // 사용자 조회 및 설정
             User user = userService.findById(userId);
@@ -83,7 +83,7 @@ public class CompetitionPageController {
             }
 
             String token = authHeader.substring(7); // "Bearer " 제거
-            String userId = jwtUtil.extractUsername(token); // 사용자 ID 추출
+            String userId = jwtUtil.validateAndExtractUsername(token); // 사용자 ID 추출
 
             // 삭제 권한 확인 및 삭제 수행
             competitionPageService.deletePageIfOwner(id, userId);
@@ -105,7 +105,7 @@ public class CompetitionPageController {
             }
 
             String token = authHeader.substring(7); // "Bearer " 제거
-            String userId = jwtUtil.extractUsername(token); // 사용자 ID 추출
+            String userId = jwtUtil.validateAndExtractUsername(token); // 사용자 ID 추출
 
             // 수정 작업 수행
             CompetitionPageResponse response = competitionPageService.updatePage(id, updatedPage, userId);
