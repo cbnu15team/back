@@ -6,6 +6,7 @@ import com.example.joinup.user.repository.UserRepository;
 import com.example.joinup.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -62,6 +63,21 @@ public class UserController {
         } catch (Exception e) {
             // 에러 메시지도 Map 형식으로 반환하도록 수정
             return ResponseEntity.status(401).body(Map.of("error", "로그인 실패: " + e.getMessage()));
+        }
+    }
+    @GetMapping("/mypage")
+    public ResponseEntity<?> getMyPage() {
+        try {
+            // 현재 인증된 사용자 ID 가져오기
+            String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            // 사용자 정보 및 작성한 글 조회
+            User user = userService.findById(userId);
+            Map<String, Object> myPageData = userService.getMyPageData(user);
+
+            return ResponseEntity.ok(myPageData);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("마이페이지를 불러오는 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
