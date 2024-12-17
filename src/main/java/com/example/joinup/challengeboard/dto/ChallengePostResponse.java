@@ -4,7 +4,7 @@ import com.example.joinup.challengeboard.entity.ChallengePost;
 
 import java.time.LocalDateTime;
 
-public class ChallengePostBoardResponse {
+public class ChallengePostResponse {
 
     private Long postId;          // 게시글 ID
     private String title;         // 제목
@@ -16,7 +16,7 @@ public class ChallengePostBoardResponse {
     private int views;            // 조회수
 
     // Constructor
-    public ChallengePostBoardResponse(ChallengePost post) {
+    public ChallengePostResponse(ChallengePost post) {
         this.postId = post.getId();
         this.title = post.getTitle();
         this.challengeType = post.getChallengeType(); // 챌린지 종류 매핑

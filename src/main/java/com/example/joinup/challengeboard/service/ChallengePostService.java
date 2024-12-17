@@ -27,6 +27,26 @@ public class ChallengePostService {
         post.setTitle(updatedPost.getTitle()); // 제목 업데이트
         post.setContent(updatedPost.getContent());
         post.setPhotoUrl(updatedPost.getPhotoUrl());
+        post.setChallengeType(updatedPost.getChallengeType()); // challengeType 수정
         return challengePostRepository.save(post);
     }
+    public ChallengePost getPostById(Long id) {
+        return challengePostRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+    }
+    @Transactional
+    public void deletePost(Long id, String userId) {
+        ChallengePost post = challengePostRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // 작성자와 요청자 일치 여부 확인
+        if (!post.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("이 게시글을 삭제할 권한이 없습니다.");
+        }
+
+        // 게시글 삭제
+        challengePostRepository.delete(post);
+    }
+
+
 }

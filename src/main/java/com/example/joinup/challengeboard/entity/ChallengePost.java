@@ -15,18 +15,21 @@ public class ChallengePost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
-    private String title; // 제목 필드 추가
+    private String title; // 제목
 
     @Column(nullable = false)
     private String photoUrl;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'defaultType'")
+    private String challengeType; // 챌린지 종류
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -42,7 +45,11 @@ public class ChallengePost {
         if (this.views == 0) {
             this.views = 0;
         }
+        if (this.challengeType == null || this.challengeType.isEmpty()) {
+            this.challengeType = "defaultType"; // 기본값 설정
+        }
     }
+
 
     public void incrementViews() {
         this.views++;
