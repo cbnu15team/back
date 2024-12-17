@@ -19,6 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/challenges")
 public class ChallengePostController {
+
     private final ChallengePostService challengePostService;
     private final UserService userService;
     private final JwtUtil jwtUtil;
@@ -32,62 +33,111 @@ public class ChallengePostController {
         this.jwtUtil = jwtUtil;
     }
 
+    // 게시글 작성
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<?> createPost(
+            @RequestParam("title") String title,
+            @RequestParam("photo") MultipartFile photo,
+            @RequestParam("content") String content,
+            @RequestParam("challengePageId") Long challengePageId,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            User user = validateUser(authHeader);
+            String savedFilePath = saveFile(photo);
+
+            ChallengePost post = new ChallengePost();
+            post.setTitle(title);
+            post.setPhotoUrl(savedFilePath);
+            post.setContent(content);
+            post.setUser(user);
+
+            ChallengePost createdPost = challengePostService.createPost(challengePageId, post);
+            return ResponseEntity.ok(new ChallengePostResponse(createdPost));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("게시글 작성 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 게시글 수정
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePost(
             @PathVariable Long id,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "photo", required = false) MultipartFile photo,
             @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "challengeType", required = false) String challengeType, // challengeType 수정 가능하게 추가
             @RequestHeader("Authorization") String authHeader) {
 
         try {
-            // Authorization 헤더 검증
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(401).body("인증이 필요합니다.");
-            }
+            User user = validateUser(authHeader);
+            ChallengePost updatedPost = challengePostService.getPostById(id);
 
-            String token = authHeader.substring(7);
-            String userId = jwtUtil.validateAndExtractUsername(token);
-
-            User user = userService.findById(userId);
-            ChallengePost existingPost = challengePostService.getPostById(id);
-
-            // 게시글 수정 권한 확인
-            if (!existingPost.getUser().getId().equals(user.getId())) {
+            if (!updatedPost.getUser().getId().equals(user.getId())) {
                 return ResponseEntity.status(403).body("이 게시글을 수정할 권한이 없습니다.");
             }
 
-            // 게시글 수정
-            if (title != null) existingPost.setTitle(title);
-            if (content != null) existingPost.setContent(content);
-
-            // challengeType 수정 추가
-            if (challengeType != null) {
-                existingPost.setChallengeType(challengeType); // challengeType 수정 로직
-            }
-
-            // 파일 수정
+            if (title != null) updatedPost.setTitle(title);
+            if (content != null) updatedPost.setContent(content);
             if (photo != null && !photo.isEmpty()) {
                 String savedFilePath = saveFile(photo);
-                existingPost.setPhotoUrl(savedFilePath);
+                updatedPost.setPhotoUrl(savedFilePath);
             }
 
-            // 서비스 호출
-            ChallengePost updatedPost = challengePostService.updatePost(id, existingPost, userId);
-            return ResponseEntity.ok(updatedPost);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("파일 저장 중 오류 발생: " + e.getMessage());
+            challengePostService.updatePost(id, updatedPost, user.getId());
+            return ResponseEntity.ok(new ChallengePostResponse(updatedPost));
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body("게시글 수정 중 오류 발생: " + e.getMessage());
         }
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            User user = validateUser(authHeader);
+            challengePostService.deletePost(id, user.getId());
+            return ResponseEntity.ok("게시글이 성공적으로 삭제되었습니다.");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("게시글 삭제 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    // 공통 메서드: 인증 및 사용자 검증
+    private User validateUser(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("인증이 필요합니다.");
+        }
+
+        String token = authHeader.substring(7);
+        String userId = jwtUtil.validateAndExtractUsername(token);
+
+        if (userId == null) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        return userService.findById(userId);
+    }
+
+    // 파일 저장 메서드
     private String saveFile(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어 있습니다.");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null && !originalFilename.matches(".*\\.(jpg|jpeg|png|gif)$")) {
+            throw new IllegalArgumentException("유효하지 않은 파일 형식입니다. jpg, jpeg, png, gif만 허용됩니다.");
+        }
+
+        String fileName = UUID.randomUUID() + "_" + originalFilename;
         Path directoryPath = Paths.get(uploadDir);
 
-        // 디렉터리 생성
         if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);
         }
@@ -96,78 +146,31 @@ public class ChallengePostController {
         Files.copy(file.getInputStream(), filePath);
         return "/uploads/" + fileName;
     }
-    @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<?> createPost(
-            @RequestParam("title") String title,
-            @RequestParam("photo") MultipartFile photo,
-            @RequestParam("content") String content,
-            @RequestParam("challengeType") String challengeType, // challengeType 추가
 
-            @RequestHeader("Authorization") String authHeader) {
+    // DTO 클래스: ChallengePostResponse
+    private static class ChallengePostResponse {
+        private Long id;
+        private String title;
+        private String content;
+        private String photoUrl;
+        private String challengeType;
+        private String userName;
 
-        try {
-            // Authorization 헤더 검증
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(401).body("인증이 필요합니다.");
-            }
-
-            String token = authHeader.substring(7);
-            String userId = jwtUtil.validateAndExtractUsername(token);
-
-            if (userId == null) {
-                return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
-            }
-
-            // 사용자 조회
-            User user = userService.findById(userId);
-
-            // 파일 저장
-            String savedFilePath = saveFile(photo);
-
-            // ChallengePost 객체 생성 및 저장
-            ChallengePost post = new ChallengePost();
-            post.setTitle(title);
-            post.setPhotoUrl(savedFilePath);
-            post.setContent(content);
-            post.setChallengeType(challengeType); // challengeType 설정
-
-
-            post.setUser(user);
-
-            ChallengePost createdPost = challengePostService.createPost(post);
-            return ResponseEntity.ok(createdPost);
-
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("파일 저장 중 오류 발생: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("게시글 작성 중 오류 발생: " + e.getMessage());
+        public ChallengePostResponse(ChallengePost post) {
+            this.id = post.getId();
+            this.title = post.getTitle();
+            this.content = post.getContent();
+            this.photoUrl = post.getPhotoUrl();
+            this.challengeType = post.getChallengeType();
+            this.userName = post.getUser().getName();
         }
+
+        // Getters
+        public Long getId() { return id; }
+        public String getTitle() { return title; }
+        public String getContent() { return content; }
+        public String getPhotoUrl() { return photoUrl; }
+        public String getChallengeType() { return challengeType; }
+        public String getUserName() { return userName; }
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePost(
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
-
-        try {
-            // Authorization 헤더 검증
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(401).body("인증이 필요합니다.");
-            }
-
-            String token = authHeader.substring(7);
-            String userId = jwtUtil.validateAndExtractUsername(token);
-
-            // 게시글 삭제 호출
-            challengePostService.deletePost(id, userId);
-            return ResponseEntity.ok("게시글이 성공적으로 삭제되었습니다.");
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(403).body("삭제 권한이 없거나 게시글이 존재하지 않습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("게시글 삭제 중 오류 발생: " + e.getMessage());
-        }
-    }
-
-
-
 }

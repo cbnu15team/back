@@ -50,5 +50,9 @@ public class User {
     public String getUsername() {
         return this.id; // ID 필드를 사용자 이름으로 간주
     }
+    public String getName() {
+        return realName;
+    }
+
 
 }

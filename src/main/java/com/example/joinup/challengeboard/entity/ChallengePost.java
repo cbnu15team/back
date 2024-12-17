@@ -19,8 +19,13 @@ public class ChallengePost {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+
+    @ManyToOne(fetch = FetchType.EAGER) // ChallengePage와의 관계 추가
+    @JoinColumn(name = "challenge_page_id", nullable = false)
+    private ChallengePage challengePage;
+
     @Column(nullable = false)
-    private String title; // 제목
+    private String title; // 인증글 제목
 
     @Column(nullable = false)
     private String photoUrl;
@@ -28,15 +33,13 @@ public class ChallengePost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'defaultType'")
-    private String challengeType; // 챌린지 종류
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private int views;
-
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'defaultType'")
+    private String challengeType;
     @PrePersist
     public void prePersist() {
         if (this.createdAt == null) {
@@ -50,7 +53,11 @@ public class ChallengePost {
         }
     }
 
-
+    // ChallengeType은 ChallengePage의 title을 반환하도록 설정
+    public String getChallengeType() {
+        return this.challengePage != null ? this.challengePage.getTitle() : "defaultType";
+    }
+    // 조회수 증가 메서드
     public void incrementViews() {
         this.views++;
     }

@@ -31,7 +31,7 @@ public class ChallengePage {
 
     // 'user'는 게시물을 작성한 사용자를 나타냅니다.
     // User 엔티티와 다대일(Many-to-One) 연관관계를 가지며, user_id를 외래 키로 사용
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false) // user_id로 User 테이블과 매핑
     private User user;
 
