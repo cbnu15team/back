@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@CrossOrigin(origins = "http://localhost:3000") // 프론트엔드 주소
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
