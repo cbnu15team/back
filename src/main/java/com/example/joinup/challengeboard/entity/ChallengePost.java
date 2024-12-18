@@ -61,7 +61,7 @@ public class ChallengePost {
                 : "defaultType";
     }
 
-    public void incrementViews() {
+      public void incrementViews() {
         this.views = Math.max(0, this.views + 1); // 조회수는 음수로 가지 않도록 보장
     }
 }
