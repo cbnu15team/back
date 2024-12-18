@@ -19,8 +19,8 @@ public class ChallengePostBoardService {
 
     // 게시글 목록 조회
     public Page<ChallengePostResponse> getAllPosts(Pageable pageable) {
-        return challengePostRepository.findAll(pageable)
-                .map(ChallengePostResponse::new);
+        Page<ChallengePost> posts = challengePostRepository.findAllWithChallengePage(pageable);
+        return posts.map(ChallengePostResponse::new);
     }
 
     // 단일 게시글 조회 및 조회수 증가
@@ -33,7 +33,6 @@ public class ChallengePostBoardService {
         // 조회수 증가
         post.incrementViews();
 
-        // 변경된 조회수 저장 (Transactional로 자동 반영)
         return new ChallengePostResponse(post);
     }
 }

@@ -18,17 +18,26 @@ public class ChallengePostResponse {
     // Constructor
     public ChallengePostResponse(ChallengePost post) {
         this.id = post.getId();
-        this.title = post.getTitle();
-        this.challengeType = post.getChallengeType();
-        this.photoUrl = post.getPhotoUrl();
-        this.content = post.getContent();
+        this.title = (post.getTitle() != null) ? post.getTitle() : "제목 없음";
+
+        // challengePage가 null인 경우 안전하게 처리
+        this.challengeType = (post.getChallengePage() != null && post.getChallengePage().getTitle() != null)
+                ? post.getChallengePage().getTitle()
+                : "미지정";
+
+        this.photoUrl = (post.getPhotoUrl() != null) ? post.getPhotoUrl() : "이미지 없음";
+        this.content = (post.getContent() != null) ? post.getContent() : "내용이 없습니다.";
+
         this.userName = (post.getUser() != null && post.getUser().getName() != null)
                 ? post.getUser().getName()
                 : "Unknown User";
-        this.createdAt = post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now();
-        this.views = post.getViews() > 0 ? post.getViews() : 0;
-    }
 
+        this.createdAt = (post.getCreatedAt() != null)
+                ? post.getCreatedAt()
+                : LocalDateTime.now();
+
+        this.views = Math.max(post.getViews(), 0); // 조회수가 음수인 경우 0으로 설정
+    }
 
     // Getters
     public Long getId() {
